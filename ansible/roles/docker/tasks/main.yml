@@ -112,7 +112,7 @@
   when: docker_rootless
   tags: docker
 
-- name: 'Add export for path'
+- name: 'Add export for path - bashrc'
   become: false
   ansible.builtin.lineinfile:
     path: /home/{{ ansible_user }}/.bashrc
@@ -121,10 +121,28 @@
   when: docker_rootless
   tags: docker
 
-- name: 'Add export for DOCKER_HOST'
+- name: 'Add export for path - zshrc'
+  become: false
+  ansible.builtin.lineinfile:
+    path: /home/{{ ansible_user }}/.zshrc
+    line: export path=/usr/bin:$PATH
+    create: yes
+  when: docker_rootless
+  tags: docker
+
+- name: 'Add export for DOCKER_HOST - bashrc'
   become: false
   ansible.builtin.lineinfile:
     path: /home/{{ ansible_user }}/.bashrc
+    line: export DOCKER_HOST=unix:///run/user/{{ getent_passwd[ansible_user][1] }}/docker.sock
+    create: yes
+  when: docker_rootless
+  tags: docker
+
+- name: 'Add export for DOCKER_HOST - zshrc'
+  become: false
+  ansible.builtin.lineinfile:
+    path: /home/{{ ansible_user }}/.zshrc
     line: export DOCKER_HOST=unix:///run/user/{{ getent_passwd[ansible_user][1] }}/docker.sock
     create: yes
   when: docker_rootless
