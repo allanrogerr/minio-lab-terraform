@@ -2,7 +2,7 @@ version: '3'
 services:
 
   certbot:
-    image: certbot/dns-google
+    image: certbot/dns-google:v0.40.1
     volumes:
       - /home/{{ user }}/certbot:/etc/letsencrypt
       - /home/{{ user }}/certbot/nginx.conf:/etc/nginx/nginx.conf

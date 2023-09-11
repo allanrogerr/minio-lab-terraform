@@ -33,7 +33,7 @@
 
 - name: Add apt repository for stable version
   apt_repository:
-    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu lunar stable
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu jammy stable
     state: present
   tags: docker
 
@@ -56,12 +56,6 @@
     - PyYAML==5.3.1
     - docker
     - docker-compose
-  tags: docker
-
-- name: Add ansible user to docker group
-  user:
-    name: "{{ user }}"
-    group: docker
   tags: docker
 
 - name: 'Disable root docker.service'
@@ -87,7 +81,7 @@
 
 - name: 'Install Docker rootless'
   become: false
-  ansible.builtin.shell: dockerd-rootless-setuptool.sh install
+  ansible.builtin.shell: dockerd-rootless-setuptool.sh install --force
   args:
     creates: /home/{{ ansible_user }}/.config/systemd/user/docker.service
   when: docker_rootless

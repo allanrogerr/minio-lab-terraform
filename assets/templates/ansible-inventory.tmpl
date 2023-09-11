@@ -5,6 +5,8 @@
 %{ endif }%{ endfor ~}
 %{ for index, name in aws_name ~}%{ if can(aws_name) }${aws_name[index]}.${environment_domain} ansible_host=${aws_minio_ips[index]}
 %{ endif }%{ endfor ~}
+%{ for index, name in vm_broker_name ~}%{ if can(vm_broker_name) }${vm_broker_name[index]}.${environment_domain} ansible_host=${vm_broker_ips[index]}
+%{ endif }%{ endfor ~}
 
 [all:vars]
 ansible_ssh_user=${user}

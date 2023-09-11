@@ -99,14 +99,8 @@
   register: certbot
   tags: certbot
 
-- name: Set podman registries
-  shell: sudo sed -i "s/# unqualified-search-registries.*/unqualified-search-registries\ =\ [\"docker.io\"]/" /etc/containers/registries.conf
-  args:
-    chdir: /home/{{ user }}/certbot
-  tags: certbot
-
 - name: Create and start certbot container (shell)
-  shell: /home/{{ user }}/.local/bin/podman-compose up -d
+  shell: docker-compose up -d
   become_user: "{{ user }}"
   args:
     chdir: /home/{{ user }}/certbot
@@ -181,7 +175,7 @@
 #  tags: k3s
 
 - name: Remove certbot container (shell)
-  shell: /home/{{ user }}/.local/bin/podman-compose down
+  shell: docker-compose down
   become_user: "{{ user }}"
   args:
     chdir: /home/{{ user }}/certbot

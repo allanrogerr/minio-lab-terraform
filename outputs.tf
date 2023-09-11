@@ -21,7 +21,7 @@ resource "local_file" "ansible_inventory" {
       }
     )
   filename = "./ansible/inventory/${var.deployment_name}/${var.deployment_name}-inventory"
-  depends_on = [hcloud_server.minio_lab_server]
+  depends_on = [vm_broker_instance.minio_lab_server]
 }
 
 resource "local_file" "ansible_config" {
@@ -116,7 +116,7 @@ resource "local_file" "mc_setup" {
       }
     )
   filename = "ansible/files/${var.deployment_name}/minio-client-setup.sh"
-  depends_on = [hcloud_server.minio_lab_server]
+  depends_on = [vm_broker_instance.minio_lab_server]
 }
 
 resource "local_file" "mc_repl_setup" {
@@ -125,7 +125,7 @@ resource "local_file" "mc_repl_setup" {
       }
     )
   filename = "ansible/files/${var.deployment_name}/minio-site-repl-setup.sh"
-  depends_on = [hcloud_server.minio_lab_server]
+  depends_on = [vm_broker_instance.minio_lab_server]
 }
 
 resource "local_file" "minio_native_start_all" {
@@ -135,7 +135,7 @@ resource "local_file" "minio_native_start_all" {
       }
     )
   filename = "ansible/files/${var.deployment_name}/minio-native-start-all.sh"
-  depends_on = [hcloud_server.minio_lab_server]
+  depends_on = [vm_broker_instance.minio_lab_server]
 }
 
 # ## Server Setup Scripts

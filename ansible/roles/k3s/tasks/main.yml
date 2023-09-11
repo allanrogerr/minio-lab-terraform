@@ -41,21 +41,21 @@
     chdir: /home/{{ user }}/kind
   tags: k3s
 
-- name: Delete kind cluster
-  become_user: "{{ user }}"x
-  shell: kind delete cluster
-  args:
-    chdir: /home/{{ user }}/kind
-  tags: k3s
-
-- name: Create kind cluster
-  become_user: "{{ user }}"
-  shell: kind create cluster --config kind-config.yaml
-  args:
-    chdir: /home/{{ user }}/kind
-  tags: k3s
-
-- name: Install ingress-nginx
-  become_user: "{{ user }}"
-  shell: helm upgrade --install ingress-nginx ingress-nginx --version 4.4.2 --repo https://kubernetes.github.io/ingress-nginx --namespace ingress-nginx --create-namespace --set controller.replicaCount=1 --set controller.ingressClassResource.default=true --set controller.service.nodePorts.http=31000 --set controller.service.nodePorts.https=31001 --set controller.service.ports.http=8080 --set controller.service.ports.https=8443
-  tags: k3s
+#- name: Delete kind cluster
+#  become_user: "{{ user }}"
+#  shell: kind delete cluster
+#  args:
+#    chdir: /home/{{ user }}/kind
+#  tags: k3s
+#
+#- name: Create kind cluster
+#  become_user: "{{ user }}"
+#  shell: kind create cluster --config kind-config.yaml
+#  args:
+#    chdir: /home/{{ user }}/kind
+#  tags: k3s
+#
+#- name: Install ingress-nginx
+#  become_user: "{{ user }}"
+#  shell: helm upgrade --install ingress-nginx ingress-nginx --version 4.4.2 --repo https://kubernetes.github.io/ingress-nginx --namespace ingress-nginx --create-namespace --set controller.replicaCount=1 --set controller.ingressClassResource.default=true --set controller.service.nodePorts.http=31000 --set controller.service.nodePorts.https=31001 --set controller.service.ports.http=8080 --set controller.service.ports.https=8443
+#  tags: k3s
