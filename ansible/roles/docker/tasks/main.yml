@@ -3,6 +3,7 @@
   apt:
     update_cache: yes
     cache_valid_time: 30
+  tags: docker
 
 - name: Install docker prereq apt packages
   apt:
@@ -18,6 +19,7 @@
   register: apt_action
   retries: 100
   until: apt_action is success or ('Failed to lock apt for exclusive operation' not in apt_action.msg and '/var/lib/dpkg/lock' not in apt_action.msg)
+  tags: docker
 
 - name: Set higher inotify.max_user_instances so we can run more containers
   shell: sysctl -w fs.inotify.max_user_instances=8192
@@ -27,11 +29,13 @@
   apt_key:
     url: https://download.docker.com/linux/ubuntu/gpg
     state: present
+  tags: docker
 
 - name: Add apt repository for stable version
   apt_repository:
-        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu lunar stable
-        state: present
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu lunar stable
+    state: present
+  tags: docker
 
 - name: Install Docker
   apt:
@@ -44,25 +48,90 @@
   register: apt_action
   retries: 100
   until: apt_action is success or ('Failed to lock apt for exclusive operation' not in apt_action.msg and '/var/lib/dpkg/lock' not in apt_action.msg)
+  tags: docker
 
 - name: Install python Docker / Docker-compose module
   pip:
     name:
-        - PyYAML==5.3.1
-        - docker
-        - docker-compose
+    - PyYAML==5.3.1
+    - docker
+    - docker-compose
+  tags: docker
 
 - name: Add ansible user to docker group
   user:
     name: "{{ user }}"
     group: docker
+  tags: docker
 
-#- name: Download docker-compose {{ docker_compose_version }}
-#  get_url:
-#    url : https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-x86_64
-#    dest: /usr/local/bin/docker-compose
-#    mode: '+x'
+- name: 'Disable root docker.service'
+  ansible.builtin.systemd:
+    name: docker.service
+    enabled: false
+  when: docker_rootless and docker_disable_root_daemon == true
+  tags: docker
 
-#- name: Check docker-compose exists
-#  stat: path=/usr/local/bin/docker-compose
-#  register: docker_compose
+- name: 'Disable root docker.socket'
+  ansible.builtin.systemd:
+    name: docker.socket
+    enabled: false
+  when: docker_rootless and docker_disable_root_daemon == true
+  tags: docker
+
+- name: 'Install uidmap for rootless UID mapping'
+  ansible.builtin.package:
+    name: uidmap
+    state: present
+  when: docker_rootless
+  tags: docker
+
+- name: 'Install Docker rootless'
+  become: false
+  ansible.builtin.shell: dockerd-rootless-setuptool.sh install
+  args:
+    creates: /home/{{ ansible_user }}/.config/systemd/user/docker.service
+  when: docker_rootless
+  tags: docker
+
+- name: 'Set capabilities for rootlesskit'
+  community.general.capabilities:
+    path: /usr/bin/rootlesskit
+    capability: '{{ docker_capabilities | join(",") }}=ep'
+    state: present
+  register: docker_capabilities_update
+  when: docker_rootless
+  tags: docker
+
+- name: 'Restart docker service'
+  become: false
+  ansible.builtin.systemd:
+    state: restarted
+    name: docker
+    scope: user
+  when: docker_rootless and docker_capabilities_update.changed
+  tags: docker
+
+- name: 'Get current user ID'
+  getent:
+    database: passwd
+    key: '{{ ansible_user }}'
+  when: docker_rootless
+  tags: docker
+
+- name: 'Add export for path'
+  become: false
+  ansible.builtin.lineinfile:
+    path: /home/{{ ansible_user }}/.bashrc
+    line: export path=/usr/bin:$PATH
+    create: yes
+  when: docker_rootless
+  tags: docker
+
+- name: 'Add export for DOCKER_HOST'
+  become: false
+  ansible.builtin.lineinfile:
+    path: /home/{{ ansible_user }}/.bashrc
+    line: export DOCKER_HOST=unix:///run/user/{{ getent_passwd[ansible_user][1] }}/docker.sock
+    create: yes
+  when: docker_rootless
+  tags: docker
