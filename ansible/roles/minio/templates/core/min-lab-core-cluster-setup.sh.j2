@@ -105,6 +105,11 @@ else
   echo -e "${RED}Failed to start LDAP services.${NC}"
 fi
 
+# Obtain private ip address to access Podman LDAP container
+IPV4_PRIVATE=$(ip -4 addr show eth0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
+sed -i "s/openldap/${IPV4_PRIVATE}/g" /home/ubuntu/minio/labs/minio-for-admins/minio-iam/realm-minio.json
+echo -e "${GREEN}Applied private IPv4 address ${IPV4_PRIVATE} to connect to LDAP server"
+
 echo -e "${GREEN}Starting Keycloak server...${NC}"
 docker run -itd \
    -p 9058:8443 \
