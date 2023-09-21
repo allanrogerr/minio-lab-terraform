@@ -16,7 +16,7 @@ docker run -itd \
    -v /mnt/data/minio1:/data \
    -e "MINIO_ROOT_USER=minioadmin" \
    -e "MINIO_ROOT_PASSWORD=minioadmin" \
-   -e "MINIO_PROMETHEUS_URL=https://prom.{{ inventory_hostname }}:10070" \
+   -e "MINIO_PROMETHEUS_URL=http://prom.{{ inventory_hostname }}:10070" \
    -e "MINIO_PROMETHEUS_JOB_ID=minio-job" \
    quay.io/minio/minio server /data --console-address ":9090" &> /dev/null
 
