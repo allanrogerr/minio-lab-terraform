@@ -37,7 +37,6 @@ frontend https_in
         bind *:80
         bind *:443 ssl crt /etc/haproxy/cert-bundle.pem
         acl tls req.ssl_hello_type 1
-        http-request redirect scheme https unless { ssl_fc }
 
         use_backend code_{{ inventory_hostname }} if { hdr(host) code.{{ inventory_hostname }} }
         use_backend minio1_{{ inventory_hostname }} if { hdr_sub(host) minio1.{{ inventory_hostname }} }
